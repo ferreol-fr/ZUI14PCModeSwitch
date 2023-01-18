@@ -1,0 +1,77 @@
+import com.android.build.OutputFile
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 32
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.example.zui14pcmodeswitch"
+        minSdkVersion 19
+        multiDexEnabled true
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 22
+        versionCode 7
+        versionName "2.2"
+        resConfigs 'en'
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('test.jks')
+            storePassword '&tBy2RChBdadN@p!kMKJ69E%LKqa#P'
+            keyPassword '&tBy2RChBdadN@p!kMKJ69E%LKqa#P'
+            keyAlias 'keyTest'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+
+    splits {
+        abi {
+            enable false
+            reset()
+            include  'arm64-v8a'
+            universalApk true
+        }
+    }
+
+    def archPrefix = [ 'arm64-v8a':1]
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            int abiVersionCode = archPrefix.get(output.getFilter(OutputFile.ABI), 0)
+            output.versionCodeOverride = (abiVersionCode * 100000) + defaultConfig.versionCode
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix '.debug'
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    namespace 'com.example.zui14pcmodeswitch'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation "androidx.core:core:1.6.0"
+    implementation 'androidx.core:core-google-shortcuts:1.0.0'
+}
